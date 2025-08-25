@@ -1,35 +1,39 @@
+// --- 1. IMPORTS ---
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
-const db = require('./models'); // Import your models and sequelize instance
+const db = require('./models');
 
-dotenv.config(); // Load environment variables from .env
-
+// --- 2. CONFIGURATION ---
+dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-// Middleware for parsing JSON requests
+// --- 3. MIDDLEWARE ---
+app.use(cors());
 app.use(express.json());
 
-// Basic test route
+// --- 4. API ROUTES ---
+// The server now uses the dedicated route files.
+app.use('/api', require('./routes/walletRoutes'));
+app.use('/api', require('./routes/projectRoutes'));
+
+// A simple test route to check if the server is running
 app.get('/', (req, res) => {
   res.send('NTS Mudra Wallet Backend is running!');
 });
 
-// Database synchronization and server start
-db.sequelize.authenticate()
-  .then(() => {
+// --- 5. SERVER STARTUP ---
+app.listen(PORT, async () => {
+  try {
+    await db.sequelize.authenticate();
     console.log('Database connection has been established successfully.');
-    // This will create/update tables based on your model definitions.
-    // For production, you'd typically use dedicated migration tools for controlled changes.
-    // 'alter: true' tries to make minimal changes without dropping tables, useful for dev.
-    return db.sequelize.sync({ alter: true });
-  })
-  .then(() => {
+    
+    await db.sequelize.sync({ alter: true });
     console.log('Database synchronized. Tables created/updated.');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database or sync models:', err);
-  });
+    
+    console.log(`Server running on port ${PORT}`);
+  } catch (error) {
+    console.error('Unable to start the server:', error);
+  }
+});

@@ -2,6 +2,7 @@ const sequelize = require('../config/database');
 const User = require('./user.model');
 const Wallet = require('./wallet.model');
 const Transaction = require('./transaction.model');
+const Project = require('./project.model');
 
 // Define Associations
 // One-to-One: User has one Wallet
@@ -16,7 +17,8 @@ const db = {
   sequelize,
   User,
   Wallet,
-  Transaction
+  Transaction,
+  Project
 };
 
 module.exports = db;
